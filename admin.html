@@ -21,6 +21,7 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             width: 90%;
             max-width: 600px;
+            text-align: center;
         }
         h1, h2 {
             text-align: center;
@@ -52,6 +53,7 @@
         }
         #shayari-list {
             margin-top: 20px;
+            text-align: left;
         }
         .shayari-item {
             background-color: #f9f9f9;
@@ -64,6 +66,8 @@
         }
         .shayari-item p {
             margin: 0;
+            flex-grow: 1;
+            margin-right: 10px;
         }
         .delete-btn {
             background-color: #dc3545;
@@ -72,6 +76,19 @@
             padding: 5px 10px;
             border-radius: 5px;
             cursor: pointer;
+            width: auto; /* Override default button width */
+        }
+        #generated-code {
+            height: 200px;
+            text-align: left;
+            font-family: monospace;
+            background-color: #e9ecef;
+        }
+        #copy-code-btn {
+            background-color: #007bff;
+        }
+        #copy-code-btn:hover {
+            background-color: #0069d9;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -80,7 +97,7 @@
 
     <div class="container" id="login-container">
         <h1>Admin Login</h1>
-        <input type="password" id="VIMALvimal9090" placeholder="Enter Password">
+        <input type="password" id="password" placeholder="Enter Password">
         <button id="login-btn">Login</button>
     </div>
 
@@ -92,7 +109,9 @@
         <button id="post-shayari-btn">Post Shayari</button>
 
         <h2>Posted Shayaris</h2>
-        <div id="shayari-list"></div>
+        <div id="shayari-list">
+            <!-- Shayaris will be loaded here -->
+        </div>
 
         <h2>Update Website</h2>
         <p>Copy the code below and paste it into your <strong>admin_shayaris.js</strong> file.</p>
@@ -112,19 +131,23 @@
             const generatedCodeTextarea = document.getElementById('generated-code');
             const copyCodeBtn = document.getElementById('copy-code-btn');
 
-            // --- CHANGE YOUR PASSWORD HERE ---
-            const ADMIN_PASSWORD = "your_password"; 
+            // --- ADMIN PASSWORD IS SET HERE ---
+            const ADMIN_PASSWORD = "VIMALvimal9090"; 
 
             let shayaris = JSON.parse(localStorage.getItem('adminShayaris')) || [];
 
             function renderShayaris() {
                 shayariListDiv.innerHTML = '';
-                shayaris.forEach((shayari, index) => {
-                    const item = document.createElement('div');
-                    item.className = 'shayari-item';
-                    item.innerHTML = `<p>${shayari}</p><button class="delete-btn" data-index="${index}">Delete</button>`;
-                    shayariListDiv.appendChild(item);
-                });
+                if (shayaris.length === 0) {
+                    shayariListDiv.innerHTML = '<p style="text-align: center; color: #888;">No shayaris posted yet.</p>';
+                } else {
+                    shayaris.forEach((shayari, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'shayari-item';
+                        item.innerHTML = `<p>${shayari}</p><button class="delete-btn" data-index="${index}">Delete</button>`;
+                        shayariListDiv.appendChild(item);
+                    });
+                }
                 updateGeneratedCode();
             }
 
@@ -133,13 +156,22 @@
                 generatedCodeTextarea.value = code;
             }
 
-            loginBtn.addEventListener('click', () => {
+            function attemptLogin() {
                 if (passwordInput.value === ADMIN_PASSWORD) {
                     loginContainer.style.display = 'none';
                     adminPanel.style.display = 'block';
                     renderShayaris();
                 } else {
                     alert('Incorrect password!');
+                }
+            }
+
+            loginBtn.addEventListener('click', attemptLogin);
+
+            // Allow login by pressing Enter key
+            passwordInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    attemptLogin();
                 }
             });
 
@@ -164,8 +196,11 @@
 
             copyCodeBtn.addEventListener('click', () => {
                 generatedCodeTextarea.select();
-                document.execCommand('copy');
-                alert('Code copied to clipboard!');
+                navigator.clipboard.writeText(generatedCodeTextarea.value).then(() => {
+                    alert('Code copied to clipboard!');
+                }).catch(err => {
+                    alert('Failed to copy code.');
+                });
             });
         });
     </script>
