@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Sunehri Shayri</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #shayari-list {
+            margin-top: 20px;
+        }
+        .shayari-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .shayari-item p {
+            margin: 0;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container" id="login-container">
+        <h1>Admin Login</h1>
+        <input type="password" id="password" placeholder="Enter Password">
+        <button id="login-btn">Login</button>
+    </div>
+
+    <div class="container" id="admin-panel" style="display: none;">
+        <h1>Admin Panel</h1>
+        
+        <h2>Post New Shayari</h2>
+        <textarea id="new-shayari" placeholder="Write your shayari here..."></textarea>
+        <button id="post-shayari-btn">Post Shayari</button>
+
+        <h2>Posted Shayaris</h2>
+        <div id="shayari-list"></div>
+
+        <h2>Update Website</h2>
+        <p>Copy the code below and paste it into your <strong>admin_shayaris.js</strong> file.</p>
+        <textarea id="generated-code" readonly></textarea>
+        <button id="copy-code-btn">Copy Code</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginContainer = document.getElementById('login-container');
+            const adminPanel = document.getElementById('admin-panel');
+            const passwordInput = document.getElementById('password');
+            const loginBtn = document.getElementById('login-btn');
+            const newShayariTextarea = document.getElementById('new-shayari');
+            const postShayariBtn = document.getElementById('post-shayari-btn');
+            const shayariListDiv = document.getElementById('shayari-list');
+            const generatedCodeTextarea = document.getElementById('generated-code');
+            const copyCodeBtn = document.getElementById('copy-code-btn');
+
+            // --- CHANGE YOUR PASSWORD HERE ---
+            const ADMIN_PASSWORD = "your_password"; 
+
+            let shayaris = JSON.parse(localStorage.getItem('adminShayaris')) || [];
+
+            function renderShayaris() {
+                shayariListDiv.innerHTML = '';
+                shayaris.forEach((shayari, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'shayari-item';
+                    item.innerHTML = `<p>${shayari}</p><button class="delete-btn" data-index="${index}">Delete</button>`;
+                    shayariListDiv.appendChild(item);
+                });
+                updateGeneratedCode();
+            }
+
+            function updateGeneratedCode() {
+                const code = `const adminShayaris = ${JSON.stringify(shayaris, null, 2)};`;
+                generatedCodeTextarea.value = code;
+            }
+
+            loginBtn.addEventListener('click', () => {
+                if (passwordInput.value === ADMIN_PASSWORD) {
+                    loginContainer.style.display = 'none';
+                    adminPanel.style.display = 'block';
+                    renderShayaris();
+                } else {
+                    alert('Incorrect password!');
+                }
+            });
+
+            postShayariBtn.addEventListener('click', () => {
+                const newShayari = newShayariTextarea.value.trim();
+                if (newShayari) {
+                    shayaris.unshift(newShayari); // Add to the beginning of the array
+                    localStorage.setItem('adminShayaris', JSON.stringify(shayaris));
+                    newShayariTextarea.value = '';
+                    renderShayaris();
+                }
+            });
+
+            shayariListDiv.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-btn')) {
+                    const index = e.target.dataset.index;
+                    shayaris.splice(index, 1);
+                    localStorage.setItem('adminShayaris', JSON.stringify(shayaris));
+                    renderShayaris();
+                }
+            });
+
+            copyCodeBtn.addEventListener('click', () => {
+                generatedCodeTextarea.select();
+                document.execCommand('copy');
+                alert('Code copied to clipboard!');
+            });
+        });
+    </script>
+
+</body>
+</html>
